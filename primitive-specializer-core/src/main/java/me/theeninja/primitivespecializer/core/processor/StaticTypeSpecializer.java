@@ -1,19 +1,13 @@
 package me.theeninja.primitivespecializer.core.processor;
 
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.resolution.MethodUsage;
 import com.github.javaparser.resolution.declarations.ResolvedTypeDeclaration;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.resolution.types.parametrization.ResolvedTypeParametersMap;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import me.theeninja.primitivespecializer.core.annotation.ClassReplacement;
 import me.theeninja.primitivespecializer.core.annotation.ReplacementConfiguration;
 import me.theeninja.primitivespecializer.core.processor.aggregator.StaticContextTypeArgumentsAggregator;
 import me.theeninja.primitivespecializer.core.processor.aggregator.TypeArgumentsAggregator;
 
-import javax.lang.model.element.TypeElement;
 import java.util.List;
 
 /**
@@ -33,6 +27,8 @@ class StaticTypeSpecializer extends KnownTypeSpecializer<MethodUsage> {
     Iterable<? extends ResolvedType> getTypeArguments(final MethodUsage methodUsage) {
         final ResolvedTypeParametersMap resolvedTypeParametersMap = methodUsage.typeParametersMap();
 
+        System.out.println("Static resolved type parameters map " + resolvedTypeParametersMap);
+
         return resolvedTypeParametersMap.getTypes();
     }
 
@@ -42,7 +38,7 @@ class StaticTypeSpecializer extends KnownTypeSpecializer<MethodUsage> {
     }
 
     @Override
-    String getQualifiedName(MethodUsage staticContextUse) {
+    String getQualifiedName(final MethodUsage staticContextUse) {
         final ResolvedTypeDeclaration resolvedTypeDeclaration = staticContextUse.declaringType();
 
         return resolvedTypeDeclaration.getQualifiedName();

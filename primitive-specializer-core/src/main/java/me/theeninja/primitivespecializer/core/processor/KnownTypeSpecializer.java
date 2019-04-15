@@ -104,7 +104,7 @@ abstract class KnownTypeSpecializer<A> extends TypeSpecializer<A, ClassOrInterfa
         return coveredTypeElements.build();
     }
 
-    ClassOrInterfaceType getSpecializingType(
+    private ClassOrInterfaceType getSpecializingType(
         final TypeElement equivalentOldTypeElement,
         final ClassReplacement classReplacement,
         final A oldInformation,
@@ -120,9 +120,9 @@ abstract class KnownTypeSpecializer<A> extends TypeSpecializer<A, ClassOrInterfa
     }
 
     private ClassOrInterfaceType getSpecializingType(
-            final ClassReplacement classReplacement,
-            final TypeElement equivalentOldTypeElement,
-            final TypeArgumentsAggregator typeArgumentsAggregator
+        final ClassReplacement classReplacement,
+        final TypeElement equivalentOldTypeElement,
+        final TypeArgumentsAggregator typeArgumentsAggregator
     ) {
         final DeclaredType nonInheritedOldDeclaredType = getClassToTypeMirror().convert(classReplacement::oldClass);
         final TypeElement nonInheritedOldTypeElement = (TypeElement) nonInheritedOldDeclaredType.asElement();
@@ -162,7 +162,10 @@ abstract class KnownTypeSpecializer<A> extends TypeSpecializer<A, ClassOrInterfa
 
         NodeList<Type> newTypeArguments = typeArgumentsAggregator.getNewTypeArguments();
 
-        specializingClass.setTypeArguments(newTypeArguments);
+        // Prevents A<> from happening where A is a specialized class
+        if (newTypeArguments.isNonEmpty()) {
+            specializingClass.setTypeArguments(newTypeArguments);
+        }
 
         return specializingClass;
     }

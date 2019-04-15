@@ -1,12 +1,9 @@
 package me.theeninja.primitivespecializer.core.processor;
 
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.nodeTypes.NodeWithOptionalScope;
 import com.github.javaparser.ast.nodeTypes.NodeWithType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.TypeParameter;
-import com.github.javaparser.resolution.MethodUsage;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.resolution.types.ResolvedTypeVariable;
@@ -16,12 +13,13 @@ import lombok.Getter;
 import me.theeninja.primitivespecializer.core.annotation.ReplacementConfiguration;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 @Getter(AccessLevel.PACKAGE)
-class TypeSpecializationForwarder {
+public class TypeSpecializationForwarder {
     private final DirectGenericTypeSpecializer directGenericTypeSpecializer;
     private final IndirectGenericTypeSpecializer indirectGenericTypeSpecializer;
+
+    @Getter(AccessLevel.PUBLIC)
     private final StaticTypeSpecializer staticTypeSpecializer;
 
     private final JavaParserFacade javaParserFacade;
@@ -30,7 +28,7 @@ class TypeSpecializationForwarder {
      * @param specializationVisitor The specialization visitor that holds the arguments that will be passed into all
      *                              the various subclasses of {@link TypeSpecializer}.
      */
-    TypeSpecializationForwarder(final SpecializationVisitor specializationVisitor) {
+    public TypeSpecializationForwarder(final SpecializationVisitor specializationVisitor) {
         final NodeList<TypeParameter> annotatedElementTypeParameters = specializationVisitor.getAnnotatedElementTypeParameters();
         final ReplacementConfiguration replacementConfiguration = specializationVisitor.getReplacementConfiguration();
         final ClassToTypeMirror classToTypeMirror = specializationVisitor.getClassToTypeMirror();
@@ -69,7 +67,7 @@ class TypeSpecializationForwarder {
      * @param nodeWithType The node which has an associated type. The current type serves as the old type of this node.
      * @param primitiveTypesCombination The combination of primitive types responsible for determining the new type from the old type.
      */
-    void updateVariableType(final NodeWithType<?, Type> nodeWithType, final PrimitiveTypesCombination primitiveTypesCombination) {
+    public void updateVariableType(final NodeWithType<?, Type> nodeWithType, final PrimitiveTypesCombination primitiveTypesCombination) {
         final Type oldType = nodeWithType.getType();
         final Type newType = getUpdatedVariableType(oldType, primitiveTypesCombination);
         nodeWithType.setType(newType);

@@ -18,7 +18,6 @@ import com.github.javaparser.ast.visitor.Visitable;
 import com.github.javaparser.resolution.MethodUsage;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
-import com.github.javaparser.resolution.types.ResolvedPrimitiveType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
@@ -26,6 +25,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.java.Log;
 import me.theeninja.primitivespecializer.core.annotation.*;
+import me.theeninja.primitivespecializer.core.processor.method.MethodCallExprVisitorForwarder;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 public class SpecializationVisitor extends ModifierVisitor<PrimitiveTypesCombination> {
     private final CompilationUnit compilationUnit;
     private final TypeSpecializationForwarder typeSpecializationForwarder;
+    private final MethodCallExprVisitorForwarder methodCallExprVisitorForwarder;
 
     SpecializationVisitor(
         final CompilationUnit compilationUnit,
@@ -61,6 +62,8 @@ public class SpecializationVisitor extends ModifierVisitor<PrimitiveTypesCombina
 
         this.compilationUnit = compilationUnit;
         this.replacementConfiguration = replacementConfiguration;
+
+        this.methodCallExprVisitorForwarder = new MethodCallExprVisitorForwarder(getReplacementConfiguration().synchronizationReplacementType());
 
         this.javaParserFacade = JavaParserFacade.get(typeSolver);
         this.classToTypeMirror = classToTypeMirror;
@@ -410,6 +413,19 @@ public class SpecializationVisitor extends ModifierVisitor<PrimitiveTypesCombina
     private static final String APPENDED_LOCK_NAME = "lock";
 
     @Override
+    public Visitable visit(final CastExpr castExpr, final PrimitiveTypesCombination primitiveTypesCombination) {
+        final Expression castSubject = castExpr.getExpression();
+
+        castSubject.ifArrayCreationExpr(arrayCreationExpr -> {
+            arrayCreationExpr.getElementType();
+        });
+
+        final Type castTarget = castExpr.getType();
+
+        return castExpr;
+    }
+
+    @Override
     public Visitable visit(final SynchronizedStmt synchronizedStatement, final PrimitiveTypesCombination primitiveTypesCombination) {
         final Expression oldLock = synchronizedStatement.getExpression();
 
@@ -435,113 +451,6 @@ public class SpecializationVisitor extends ModifierVisitor<PrimitiveTypesCombina
         return synchronizedStatement;
     }
 
-    private static BinaryExpr newBinaryExpr(final Expression callInitiator, final Expression callArgument, final BinaryExpr.Operator operator) {
-        final BinaryExpr binaryExpr = new BinaryExpr();
-        binaryExpr.setLeft(callInitiator);
-        binaryExpr.setRight(callArgument);
-        binaryExpr.setOperator(operator);
-
-        return binaryExpr;
-    }
-
-    private Visitable visitInstanceInitializingMethodCallExpr(
-        final MethodCallExpr methodCallExpr,
-        final ResolvedType resolvedType,
-        final PrimitiveTypesCombination primitiveTypesCombination
-    ) {
-        if (!resolvedType.isPrimitive()) {
-            return methodCallExpr;
-        }
-
-        final ResolvedPrimitiveType resolvedPrimitiveType = resolvedType.asPrimitive();
-
-        final Expression callInitiator = methodCallExpr.getScope().get();
-
-        final String methodName = methodCallExpr.getNameAsString();
-
-        switch (methodName) {
-            case "equals": {
-                final Expression callArgument = methodCallExpr.getArguments().get(0);
-
-                BinaryExpr equivalentBinaryExpr = newBinaryExpr(callInitiator, callArgument, BinaryExpr.Operator.EQUALS);
-
-                methodCallExpr.replace(equivalentBinaryExpr);
-
-                return methodCallExpr;
-            }
-            case "compareTo": {
-                final Expression callArgument = methodCallExpr.getArguments().get(0);
-
-                BinaryExpr equivalentBinaryExpr = newBinaryExpr(callInitiator, callArgument, BinaryExpr.Operator.LESS_EQUALS);
-
-                methodCallExpr.replace(equivalentBinaryExpr);
-
-                return methodCallExpr;
-            }
-            case "getClass": {
-                final String classLiteralName = resolvedPrimitiveType.getBoxTypeQName();
-
-                /* final ClassExpr primitiveClassExpression = new ClassExpr(classLiteralName);
-
-                methodCallExpr.replace(primitiveClassExpression); */
-
-                return methodCallExpr;
-
-            }
-            case "intValue": {
-                return new CastExpr(PrimitiveType.intType(), callInitiator);
-            }
-            case "byteValue": {
-                return new CastExpr(PrimitiveType.byteType(), callInitiator);
-            }
-            case "shortValue": {
-                return new CastExpr(PrimitiveType.shortType(), callInitiator);
-            }
-            case "longValue": {
-                return new CastExpr(PrimitiveType.longType(), callInitiator);
-            }
-            case "floatValue": {
-                return new CastExpr(PrimitiveType.floatType(), callInitiator);
-            }
-            case "doubleValue": {
-                return new CastExpr(PrimitiveType.doubleType(), callInitiator);
-            }
-
-            // TODO Throw a compile-time error if a variable with a name equivalent to any boxed primitive type is detected
-            case "hashCode": {
-                final String primitiveBoxedTypeName = resolvedPrimitiveType.getBoxTypeQName();
-                final NameExpr primitiveBoxedTypeAsCaller = new NameExpr(primitiveBoxedTypeName);
-
-                methodCallExpr.setScope(primitiveBoxedTypeAsCaller);
-                methodCallExpr.getArguments().add(callInitiator);
-
-                return methodCallExpr;
-            }
-            case "wait":
-            case "notify":
-            case "notifyAll": {
-                final SynchronizationReplacementType synchronizationReplacementType = getReplacementConfiguration().synchronizationReplacementType();
-
-                switch (synchronizationReplacementType) {
-                    case FORBID: {
-                        throw new IllegalArgumentException();
-                    }
-                    case APPEND_PARAMETER: {
-                        setValueAsLock();
-
-                        final NameExpr nameExpr = new NameExpr(APPENDED_LOCK_NAME);
-                        methodCallExpr.setScope(nameExpr);
-
-                        return methodCallExpr;
-                    }
-                }
-            }
-            default: {
-                return methodCallExpr;
-            }
-        }
-    }
-
     @Override
     public Visitable visit(final MethodCallExpr methodCallExpr, final PrimitiveTypesCombination primitiveTypesCombination) {
         final Optional<Expression> optionalMethodCaller = methodCallExpr.getScope();
@@ -549,13 +458,17 @@ public class SpecializationVisitor extends ModifierVisitor<PrimitiveTypesCombina
         if (optionalMethodCaller.isPresent()) {
             final Expression methodCaller = optionalMethodCaller.get();
 
+            // Is an instance method
             try {
                 final ResolvedType variableType = getJavaParserFacade().getType(methodCaller, true);
 
-                return visitInstanceInitializingMethodCallExpr(methodCallExpr, variableType, primitiveTypesCombination);
+                return getMethodCallExprVisitorForwarder().visitInstanceInitializingMethodCallExpr(methodCallExpr, variableType, primitiveTypesCombination);
             }
+            // Else is a static method
             catch (final UnsolvedSymbolException e) {
-                return methodCallExpr;
+                final ResolvedType type = getJavaParserFacade().getType(methodCaller);
+
+                return getMethodCallExprVisitorForwarder().visitStaticInitializingMethodCallExpr(methodCallExpr, type, primitiveTypesCombination);
             }
         }
 

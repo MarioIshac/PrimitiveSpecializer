@@ -12,6 +12,7 @@ import com.github.javaparser.symbolsolver.model.resolution.SymbolReference;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import me.theeninja.primitivespecializer.core.processor.PrimitiveTypesCombination;
 
 import java.util.Optional;
 

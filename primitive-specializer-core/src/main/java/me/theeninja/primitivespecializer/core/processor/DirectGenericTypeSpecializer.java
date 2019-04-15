@@ -8,7 +8,6 @@ import com.github.javaparser.resolution.types.ResolvedTypeVariable;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 /**
  * The type specializer responsible for specializing type variables (such as {@code A}).

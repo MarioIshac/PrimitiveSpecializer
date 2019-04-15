@@ -114,7 +114,7 @@ public class Map<K, V> {
     }
 
     public Stream<K> streamKeys() {
-        final Builder<K> streamBuilder = builder();
+        final Builder<K> streamBuilder = Stream.<K>builder();
 
         for (Node node : getHashes()) {
             while (node != null) {
@@ -128,7 +128,7 @@ public class Map<K, V> {
     }
 
     public Stream<V> streamValues() {
-        final Builder<V> streamBuilder = builder();
+        final Builder<V> streamBuilder = Stream.builder();
 
         for (Node node : getHashes()) {
             while (node != null) {

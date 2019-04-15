@@ -17,10 +17,10 @@ import java.util.function.Supplier;
 
 @AllArgsConstructor
 @Getter(AccessLevel.PRIVATE)
-class ClassToTypeMirror {
+public class ClassToTypeMirror {
     private final Elements elements;
 
-    DeclaredType convert(final Supplier<Class<?>> classGetter) {
+    public DeclaredType convert(final Supplier<Class<?>> classGetter) {
         try {
             final Class<?> suppliedClass = classGetter.get();
 

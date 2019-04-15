@@ -1,6 +1,7 @@
 package me.theeninja.primitivespecializer.core.processor;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -162,7 +163,7 @@ public class SpecializationVisitor extends ModifierVisitor<PrimitiveTypesCombina
 
     private static final String RUN_TIME_EXCEPTION_TYPE_QUALIFIED_NAME = IllegalArgumentException.class.getCanonicalName();
 
-    private static final ClassOrInterfaceType RUN_TIME_EXCEPTION_TYPE = JavaParser.parseClassOrInterfaceType(
+    private static final ClassOrInterfaceType RUN_TIME_EXCEPTION_TYPE = StaticJavaParser.parseClassOrInterfaceType(
         RUN_TIME_EXCEPTION_TYPE_QUALIFIED_NAME
     );
 
@@ -395,7 +396,7 @@ public class SpecializationVisitor extends ModifierVisitor<PrimitiveTypesCombina
         return isValueAsLock() && synchronizationReplacementType == SynchronizationReplacementType.APPEND_PARAMETER;
     }
 
-    private static final Type LOCK_PARAMETER_TYPE = JavaParser.parseClassOrInterfaceType(Object.class.getCanonicalName());
+    private static final Type LOCK_PARAMETER_TYPE = StaticJavaParser.parseClassOrInterfaceType(Object.class.getCanonicalName());
 
     @Override
     public Visitable visit(final ConstructorDeclaration constructorDeclaration, final PrimitiveTypesCombination primitiveTypesCombination) {
@@ -415,12 +416,6 @@ public class SpecializationVisitor extends ModifierVisitor<PrimitiveTypesCombina
     @Override
     public Visitable visit(final CastExpr castExpr, final PrimitiveTypesCombination primitiveTypesCombination) {
         final Expression castSubject = castExpr.getExpression();
-
-        castSubject.ifArrayCreationExpr(arrayCreationExpr -> {
-            arrayCreationExpr.getElementType();
-        });
-
-        final Type castTarget = castExpr.getType();
 
         return castExpr;
     }

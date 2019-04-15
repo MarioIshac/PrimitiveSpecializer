@@ -51,7 +51,7 @@ public class TypeSpecializationForwarder {
      * @param primitiveTypesCombination The combination of primitive types responsible for determining the new type from the old type.
      * @return The new type.
      */
-    private Type getUpdatedVariableType(Type oldType, PrimitiveTypesCombination primitiveTypesCombination) {
+    Type getUpdatedVariableType(Type oldType, PrimitiveTypesCombination primitiveTypesCombination) {
         final ResolvedType resolvedOldType = getJavaParserFacade().convertToUsage(oldType);
 
         final Optional<? extends Type> optionalNewType = getOptionalNewType(resolvedOldType, primitiveTypesCombination);

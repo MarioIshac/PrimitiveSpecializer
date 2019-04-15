@@ -1,6 +1,7 @@
 package me.theeninja.primitivespecializer.core.processor;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
@@ -158,7 +159,7 @@ abstract class KnownTypeSpecializer<A> extends TypeSpecializer<A, ClassOrInterfa
             newFullyQualifiedName += inheritedClassComponent;
         }
 
-        final ClassOrInterfaceType specializingClass = JavaParser.parseClassOrInterfaceType(newFullyQualifiedName);
+        final ClassOrInterfaceType specializingClass = StaticJavaParser.parseClassOrInterfaceType(newFullyQualifiedName);
 
         NodeList<Type> newTypeArguments = typeArgumentsAggregator.getNewTypeArguments();
 

@@ -1,6 +1,7 @@
 package me.theeninja.primitivespecializer.core.processor.aggregator;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.type.*;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
@@ -51,7 +52,7 @@ public class IndirectContextTypeArgumentsAggregator extends StaticContextTypeArg
     private void aggregateReferenceArgument(final ResolvedReferenceType preservedResolvedReferenceType) {
         final String referenceTypeQualifiedName = preservedResolvedReferenceType.getQualifiedName();
 
-        final ClassOrInterfaceType referenceType = JavaParser.parseClassOrInterfaceType(referenceTypeQualifiedName);
+        final ClassOrInterfaceType referenceType = StaticJavaParser.parseClassOrInterfaceType(referenceTypeQualifiedName);
 
         this.getNewTypeArguments().add(referenceType);
     }

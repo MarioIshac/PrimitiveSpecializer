@@ -1,5 +1,6 @@
 package me.theeninja.primitivespecializer.core.processor;
 
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver;
@@ -259,7 +260,7 @@ class SpecializationWriter {
                 currentChoicesPermutation[columnIndex] = possibleColumnChoices[nextColumnChoiceIndex];
             }
 
-            final CompilationUnit specializedClassCompilationUnit = JavaParser.parse(annotatedClassSourceCode);
+            final CompilationUnit specializedClassCompilationUnit = StaticJavaParser.parse(annotatedClassSourceCode);
 
             final String annotatedTypeElementSimpleName = getAnnotatedTypeElement().getSimpleName().toString();
 

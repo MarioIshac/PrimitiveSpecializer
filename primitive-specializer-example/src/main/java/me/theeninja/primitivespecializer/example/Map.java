@@ -141,10 +141,9 @@ public class Map<K, V> {
         return streamBuilder.build();
     }
 
-    public Node[] getHashes() {
+    private Node[] getHashes() {
         return hashes;
     }
-
 
     private class Node {
         private K key;

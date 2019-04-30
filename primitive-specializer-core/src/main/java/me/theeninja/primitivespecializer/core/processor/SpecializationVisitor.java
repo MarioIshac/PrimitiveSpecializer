@@ -461,9 +461,12 @@ public class SpecializationVisitor extends ModifierVisitor<PrimitiveTypesCombina
             }
             // Else is a static method
             catch (final UnsolvedSymbolException e) {
-                final ResolvedType type = getJavaParserFacade().getType(methodCaller);
+                try {
+                    final ResolvedType type = getJavaParserFacade().getType(methodCaller);
 
-                return getMethodCallExprVisitorForwarder().visitStaticInitializingMethodCallExpr(methodCallExpr, type, primitiveTypesCombination);
+                    return getMethodCallExprVisitorForwarder().visitStaticInitializingMethodCallExpr(methodCallExpr, type, primitiveTypesCombination);
+                }
+                catch (final UnsolvedSymbolException ignored) {}
             }
         }
 

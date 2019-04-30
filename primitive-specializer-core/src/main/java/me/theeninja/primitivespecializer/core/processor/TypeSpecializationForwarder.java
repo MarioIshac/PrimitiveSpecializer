@@ -15,7 +15,7 @@ import me.theeninja.primitivespecializer.core.annotation.ReplacementConfiguratio
 import java.util.Optional;
 
 @Getter(AccessLevel.PACKAGE)
-public class TypeSpecializationForwarder {
+class TypeSpecializationForwarder {
     private final DirectGenericTypeSpecializer directGenericTypeSpecializer;
     private final IndirectGenericTypeSpecializer indirectGenericTypeSpecializer;
 
@@ -28,7 +28,7 @@ public class TypeSpecializationForwarder {
      * @param specializationVisitor The specialization visitor that holds the arguments that will be passed into all
      *                              the various subclasses of {@link TypeSpecializer}.
      */
-    public TypeSpecializationForwarder(final SpecializationVisitor specializationVisitor) {
+    TypeSpecializationForwarder(final SpecializationVisitor specializationVisitor) {
         final NodeList<TypeParameter> annotatedElementTypeParameters = specializationVisitor.getAnnotatedElementTypeParameters();
         final ReplacementConfiguration replacementConfiguration = specializationVisitor.getReplacementConfiguration();
         final ClassToTypeMirror classToTypeMirror = specializationVisitor.getClassToTypeMirror();
@@ -51,7 +51,7 @@ public class TypeSpecializationForwarder {
      * @param primitiveTypesCombination The combination of primitive types responsible for determining the new type from the old type.
      * @return The new type.
      */
-    Type getUpdatedVariableType(Type oldType, PrimitiveTypesCombination primitiveTypesCombination) {
+    private Type getUpdatedVariableType(Type oldType, PrimitiveTypesCombination primitiveTypesCombination) {
         final ResolvedType resolvedOldType = getJavaParserFacade().convertToUsage(oldType);
 
         final Optional<? extends Type> optionalNewType = getOptionalNewType(resolvedOldType, primitiveTypesCombination);
@@ -67,7 +67,7 @@ public class TypeSpecializationForwarder {
      * @param nodeWithType The node which has an associated type. The current type serves as the old type of this node.
      * @param primitiveTypesCombination The combination of primitive types responsible for determining the new type from the old type.
      */
-    public void updateVariableType(final NodeWithType<?, Type> nodeWithType, final PrimitiveTypesCombination primitiveTypesCombination) {
+    void updateVariableType(final NodeWithType<?, Type> nodeWithType, final PrimitiveTypesCombination primitiveTypesCombination) {
         final Type oldType = nodeWithType.getType();
         final Type newType = getUpdatedVariableType(oldType, primitiveTypesCombination);
         nodeWithType.setType(newType);
